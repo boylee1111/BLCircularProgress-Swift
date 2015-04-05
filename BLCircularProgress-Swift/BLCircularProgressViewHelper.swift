@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 boyi. All rights reserved.
 //
 
-import Foundation
 import CoreGraphics
 
 postfix operator ** { } // square function
