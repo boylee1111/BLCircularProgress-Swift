@@ -16,7 +16,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        self.circularProgress.progress = 1
+        self.circularProgress.progress = 30
+        self.circularProgress.maximaProgress = 90
+        self.circularProgress.minimaProgress = 20
+        
+        NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "updateProgress", userInfo: nil, repeats: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -24,6 +28,15 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-
+    func updateProgress() {
+        var randomValue = self.randomDoubleBetween(0, bigValue: 100)
+        println("random value = \(randomValue)")
+        self.circularProgress.animateProgress(randomValue, completion: nil)
+    }
+    
+    func randomDoubleBetween(smallValue: Double, bigValue: Double) -> Double {
+        var diff = bigValue - smallValue
+        return Double(arc4random_uniform(UInt32(diff))) + smallValue
+    }
 }
 

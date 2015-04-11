@@ -22,9 +22,9 @@ public enum AnimationAlgorithm {
 }
 
 public enum AnimationType {
-    case AnimationTypeEaseIn((Double, Double, Double, Double) -> Double)
-    case AnimationTypeEaseOut((Double, Double, Double, Double) -> Double)
-    case AnimationTypeEaseInEaseOut((Double, Double, Double, Double) -> Double)
+    case AnimationTypeEaseIn
+    case AnimationTypeEaseOut
+    case AnimationTypeEaseInEaseOut
 }
 
 protocol AnimationProgressAlgorithmProtocol {

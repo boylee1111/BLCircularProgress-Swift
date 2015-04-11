@@ -24,6 +24,6 @@ class CubicAnimationAlgorithm : AnimationProgressAlgorithm, AnimationProgressAlg
             return changeInValue / 2 * currentTime * currentTime * currentTime + startValue
         }
         currentTime -= 2
-        return -changeInValue / 2 * (currentTime * currentTime * currentTime + 2) + startValue
+        return changeInValue / 2 * (currentTime * currentTime * currentTime + 2) + startValue
     }
 }

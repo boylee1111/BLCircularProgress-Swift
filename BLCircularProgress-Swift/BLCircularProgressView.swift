@@ -9,6 +9,7 @@
 import UIKit
 
 let shiftPercentageWhenOutOfBoard: Double = 0.05
+let progressUpdateAnimationFramesPerSecond: Double = 80
 
 func shiftValueWhenOutOfBoard(progressDiff: Double) -> Double {
     return progressDiff * shiftPercentageWhenOutOfBoard
@@ -35,8 +36,9 @@ public class BLCircularProgressView: UIView {
     private var circleWidth: Double = 0
     
     private var currentSegmentNumber: Int = 0
-    private var startProgressValue: Double = 0
-    private var progressUpdateDiff: Double = 0
+    // A closure that animation update the progress, first return value is animation count, second is current value
+    private var progressCalculateClosure: (() -> (segmengCount: Int, progressValue: Double))?
+    private var animationProgressAlgorithm: AnimationProgressAlgorithm = CubicAnimationAlgorithm()
     
     public var progress: Double = 0 {
         didSet {
@@ -76,8 +78,12 @@ public class BLCircularProgressView: UIView {
     }
     public var thicknessRadio: Double = 0.2 { didSet { self.setNeedsDisplay() } }
     public var progressAnimationDuration: Double = 0.8
-    public var animationAlgorithm: AnimationAlgorithm = .AnimationAlgorithmSimpleLinear
-    public var animationType: AnimationType
+    public var animationAlgorithm: AnimationAlgorithm = .AnimationAlgorithmCubic {
+        didSet {
+            self.setAnimationProgressAlgorithmWithAnimationAlgorithm(animationAlgorithm)
+        }
+    }
+    public var animationType: AnimationType = .AnimationTypeEaseInEaseOut
     
     public var touchResponseOuterShiftValue: Double = 5
     public var touchResponseInnerShiftValue: Double = 5
@@ -91,15 +97,26 @@ public class BLCircularProgressView: UIView {
     // MARK: - init
     
     public required init(coder aDecoder: NSCoder) {
-        func defaultFunction(a: Double, b: Double, c: Double, d: Double) -> Double { return 0 }
-        self.animationType = .AnimationTypeEaseInEaseOut(defaultFunction)
         super.init(coder: aDecoder)
     }
     
     public override init(frame: CGRect) {
-        func defaultFunction(a: Double, b: Double, c: Double, d: Double) -> Double { return 0 }
-        self.animationType = .AnimationTypeEaseInEaseOut(defaultFunction)
         super.init(frame: frame)
+    }
+    
+    public func updateStartAngleWithPresetValue(circularProgressStartAngle: CircularProgressStartAngle) {
+        self.startAngle = circularProgressStartAngle.rawValue
+    }
+    
+    public func animateProgress(var newProgress: Double, completion: ((Double) -> Void)?) {
+        newProgress = min(self.maximaProgress, max(self.minimaProgress, newProgress))
+        let startProgressValue = self.progress
+        let progressUpdateDiff = newProgress - startProgressValue
+        self.userInteractionEnabled = false
+        currentSlideStatus = .SlideStatusNone
+        
+        progressCalculateClosure = self.makeProgressCalculateClosure(startProgressValue, changeInvalue: progressUpdateDiff)
+        NSTimer.scheduledTimerWithTimeInterval(1 / progressUpdateAnimationFramesPerSecond, target: self, selector: "updateProgress:", userInfo: nil, repeats: true)
     }
     
     // MARK: - Drawing
@@ -195,6 +212,7 @@ public class BLCircularProgressView: UIView {
             case .SlideStatusInBorder:
                 let maximaProgressAngle = (self.maximaProgress - self.minProgress) / (self.maxProgress - self.minProgress) * 360 + self.startAngle
                 let minimaProgressAngle = (self.minimaProgress - self.minProgress) / (self.maxProgress - self.minProgress) * 360 + self.startAngle
+                // The absolution angle difference from target angle to maxima angle or minima angle
                 let toMaximaProgressAngle = twoAngleAbsoluteDistance(angle, maximaProgressAngle, self.clockwise)
                 let toMinimaProgressAngle = twoAngleAbsoluteDistance(angle, minimaProgressAngle, !self.clockwise)
                 
@@ -233,5 +251,55 @@ public class BLCircularProgressView: UIView {
         currentSlideStatus = .SlideStatusNone
         
         super.touchesCancelled(touches, withEvent: event)
+    }
+    
+    // MARK: - Helper Methods
+    
+    func setAnimationProgressAlgorithmWithAnimationAlgorithm(animationAlgorithm: AnimationAlgorithm) {
+        switch animationAlgorithm {
+        case .AnimationAlgorithmSimpleLinear:
+            animationProgressAlgorithm = SimpleLinearAnimationAlgorithm()
+        case .AnimationAlgorithmQuadratic:
+            animationProgressAlgorithm = QuadraticAnimationAlgorithm()
+        case .AnimationAlgorithmCubic:
+            animationProgressAlgorithm = CubicAnimationAlgorithm()
+        case .AnimationAlgorithmQuartic:
+            animationProgressAlgorithm = QuarticAnimationAlgorithm()
+        case .AnimationAlgorithmQuintic:
+            animationProgressAlgorithm = QuinticAnimationAlgorithm()
+        case .AnimationAlgorithmSinusoidal:
+            animationProgressAlgorithm = SinusoidalAnimationAlgorithm()
+        case .AnimationAlgorithmExponential:
+            animationProgressAlgorithm = ExponentialAnimationAlgorithm()
+        case .AnimationAlgorithmCircular:
+            animationProgressAlgorithm = CircularAnimationAlgorithm()
+        }
+    }
+    
+    // Function called by timer to update progress periodically
+    func updateProgress(timer: NSTimer) {
+        let calculateResult = progressCalculateClosure!()
+        let segmentCount = calculateResult.0
+        if segmentCount >= Int(progressUpdateAnimationFramesPerSecond * self.progressAnimationDuration) {
+            self.userInteractionEnabled = true
+            timer.invalidate()
+            return ;
+        }
+        self.progress = calculateResult.1
+    }
+    
+    // Generate the closure that calculate update count and update value
+    func makeProgressCalculateClosure(value: Double, changeInvalue: Double) -> () -> (segmengCount: Int, progressValue: Double) {
+        var runningValue = value
+        var segmentCount = 0
+        let startValue = value
+        let calculateAlgorithmClosure = animationProgressAlgorithm.animationAlgorithm(self.animationType)
+        
+        func calculateStepClosure() -> (Int, Double) {
+            segmentCount++
+            runningValue = calculateAlgorithmClosure(Double(segmentCount) / progressUpdateAnimationFramesPerSecond, startValue, changeInvalue, self.progressAnimationDuration)
+            return (segmentCount, runningValue)
+        }
+        return calculateStepClosure
     }
 }
