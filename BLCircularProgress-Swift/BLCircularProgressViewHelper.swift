@@ -22,8 +22,8 @@ func radiansToDegrees(radians: Double) -> Double {
     return radians * 180.0 / M_PI
 }
 
-func twoPointAbsoluteDistance(point1: Point, point2: Point) -> Double {
-    return sqrt((Double((point1.h - point2.h))** + Double((point1.v - point2.v))**))
+func twoPointAbsoluteDistance(point1: CGPoint, point2: CGPoint) -> Double {
+    return sqrt((Double((point1.x - point2.x))** + Double((point1.y - point2.y))**))
 }
 
 func twoAngleAbsoluteDistance(var fromAngle: Double, var toAngle: Double, clockwise: Bool) -> Double {

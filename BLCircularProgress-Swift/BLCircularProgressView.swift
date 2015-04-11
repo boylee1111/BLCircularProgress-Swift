@@ -32,7 +32,7 @@ public class BLCircularProgressView: UIView {
     private var startProgressValue: Double = 0
     private var progressUpdateDiff: Double = 0
     
-    public var progress: Double = 0{
+    public var progress: Double = 0 {
         didSet {
             progress = min(maximaProgress, max(minimaProgress, progress))
             self.setNeedsDisplay()
@@ -76,9 +76,11 @@ public class BLCircularProgressView: UIView {
     public var touchResponseOuterShiftValue: Double = 5
     public var touchResponseInnerShiftValue: Double = 5
     
-    public var progressFillColor: UIColor? = UIColor.blackColor() { didSet { self.setNeedsDisplay() } }
-    public var progressTopGradientColor: UIColor? { didSet { self.setNeedsDisplay() } }
-    public var progressBottomGradientColor: UIColor? { didSet { self.setNeedsDisplay() } }
+    public var progressFillColor: UIColor? { didSet { self.setNeedsDisplay() } }
+    public var progressTopGradientColor: UIColor? = UIColor(red: 0.992156863, green: 0.929411765, blue: 0.866666667, alpha: 1.0)
+        { didSet { self.setNeedsDisplay() } }
+    public var progressBottomGradientColor: UIColor? = UIColor(red: 0.97254902, green: 0.764705882, blue: 0.568627451, alpha: 1.0)
+        { didSet { self.setNeedsDisplay() } }
     
     public required init(coder aDecoder: NSCoder) {
         func defaultFunction(a: Double, b: Double, c: Double, d: Double) -> Double { return 0 }
@@ -131,17 +133,17 @@ public class BLCircularProgressView: UIView {
             radius: CGFloat(circleRadius - circleWidth),
             startAngle: CGFloat(degreesToRadians(progressAngle)),
             endAngle: CGFloat(degreesToRadians(startAngle)),
-            clockwise: clockwise)
+            clockwise: !clockwise)
         
         path.closePath()
         
-        if let progressFillColor = progressFillColor? {
-            progressFillColor.setFill()
+        if let fillColor = progressFillColor{
+            fillColor.setFill()
             path.fill()
-        } else if progressTopGradientColor != nil && progressBottomGradientColor != nil {
+        } else if let topColor = progressTopGradientColor, bottomColor = progressBottomGradientColor {
             path.addClip()
             
-            let backgroundColors = [progressTopGradientColor?.CGColor!, progressBottomGradientColor?.CGColor!]
+            let backgroundColors = [topColor.CGColor!, bottomColor.CGColor!]
             let cfBackgroundColors = CFArrayCreate(nil, UnsafeMutablePointer<UnsafePointer<Void>>(backgroundColors), backgroundColors.count, nil)
             let backgroundColorLocations: [CGFloat] = [0.0, 1.0]
             let rgb = CGColorSpaceCreateDeviceRGB()
@@ -155,20 +157,19 @@ public class BLCircularProgressView: UIView {
     
     // MARK: - touches event
     
-    public override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         super.touchesBegan(touches, withEvent: event)
     }
     
-    public override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
         super.touchesMoved(touches, withEvent: event)
     }
     
-    public override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         super.touchesEnded(touches, withEvent: event)
     }
     
-    public override func touchesCancelled(touches: NSSet!, withEvent event: UIEvent!) {
+    public override func touchesCancelled(touches: Set<NSObject>!, withEvent event: UIEvent!) {
         super.touchesCancelled(touches, withEvent: event)
-        
     }
 }
