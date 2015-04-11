@@ -8,6 +8,12 @@
 
 import UIKit
 
+let shiftPercentageWhenOutOfBoard: Double = 0.05
+
+func shiftValueWhenOutOfBoard(progressDiff: Double) -> Double {
+    return progressDiff * shiftPercentageWhenOutOfBoard
+}
+
 public enum CircularProgressStartAngle : Double {
     case CircularProgressStartAngleNorth = 270.0
     case CircularProgressStartAngleEast  = 0.0
@@ -82,6 +88,8 @@ public class BLCircularProgressView: UIView {
     public var progressBottomGradientColor: UIColor? = UIColor(red: 0.97254902, green: 0.764705882, blue: 0.568627451, alpha: 1.0)
         { didSet { self.setNeedsDisplay() } }
     
+    // MARK: - init
+    
     public required init(coder aDecoder: NSCoder) {
         func defaultFunction(a: Double, b: Double, c: Double, d: Double) -> Double { return 0 }
         self.animationType = .AnimationTypeEaseInEaseOut(defaultFunction)
@@ -95,7 +103,7 @@ public class BLCircularProgressView: UIView {
     }
     
     // MARK: - Drawing
-    
+
     override public func drawRect(rect: CGRect) {
         var progressAngle: Double;
         if clockwise {
@@ -149,27 +157,81 @@ public class BLCircularProgressView: UIView {
             let rgb = CGColorSpaceCreateDeviceRGB()
             let backgroundGradient = CGGradientCreateWithColors(rgb, cfBackgroundColors, backgroundColorLocations)
             
-            CGContextDrawLinearGradient(context, backgroundGradient, CGPoint(x: 0.0, y: square.origin.y), CGPoint(x: 0.0, y: square.size.height), 0)
+            CGContextDrawLinearGradient(
+                context,
+                backgroundGradient,
+                CGPoint(x: 0.0, y: square.origin.y),
+                CGPoint(x: 0.0, y: square.size.height),
+                0)
         }
         
         CGContextSaveGState(context)
     }
     
-    // MARK: - touches event
+    // MARK: - Touches Events
     
     public override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+        if let touch = touches.first as? UITouch {
+            let touchLocation = touch.locationInView(self)
+            
+            if twoPointAbsoluteDistance(touchLocation, self.circleCenter) < self.circleRadius + self.touchResponseOuterShiftValue && twoPointAbsoluteDistance(touchLocation, self.circleCenter) > self.circleRadius - self.circleWidth - self.touchResponseInnerShiftValue {
+                self.currentSlideStatus = .SlideStatusInBorder
+            }
+        }
+        
         super.touchesBegan(touches, withEvent: event)
     }
     
     public override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
+        if let touch = touches.first as? UITouch {
+            let touchLocation = touch.locationInView(self)
+            let angle = fmod(angleFromNorth(self.circleCenter, touchLocation), 360.0)
+            let angleDistanceFromStart = twoAngleAbsoluteDistance(self.startAngle, angle, self.clockwise)
+            let progressTmp = (self.maxProgress - minProgress) * angleDistanceFromStart / 360.0 + self.minProgress
+            
+            switch currentSlideStatus {
+            case .SlideStatusNone:
+                return ;
+            case .SlideStatusInBorder:
+                let maximaProgressAngle = (self.maximaProgress - self.minProgress) / (self.maxProgress - self.minProgress) * 360 + self.startAngle
+                let minimaProgressAngle = (self.minimaProgress - self.minProgress) / (self.maxProgress - self.minProgress) * 360 + self.startAngle
+                let toMaximaProgressAngle = twoAngleAbsoluteDistance(angle, maximaProgressAngle, self.clockwise)
+                let toMinimaProgressAngle = twoAngleAbsoluteDistance(angle, minimaProgressAngle, !self.clockwise)
+                
+                if progressTmp < self.maximaProgress && progressTmp > self.minimaProgress {
+                    self.progress = progressTmp
+                } else {
+                    if (toMaximaProgressAngle <= toMinimaProgressAngle) {
+                        self.progress = self.minimaProgress
+                        currentSlideStatus = .SlideStatusOutOfBorderFromMinimumValue
+                    } else {
+                        self.progress = self.maximaProgress
+                        currentSlideStatus = .SlideStatusOutOfBorderFromMaximumValue
+                    }
+                }
+            case .SlideStatusOutOfBorderFromMinimumValue:
+                if progressTmp >= self.minimaProgress && progressTmp < self.minimaProgress + shiftValueWhenOutOfBoard(self.maxProgress - self.minProgress) {
+                    currentSlideStatus = .SlideStatusInBorder
+                }
+            case .SlideStatusOutOfBorderFromMaximumValue:
+                if progressTmp <= self.maximaProgress && progressTmp > self.maximaProgress - shiftValueWhenOutOfBoard(self.maxProgress - self.minProgress) {
+                    currentSlideStatus = .SlideStatusInBorder
+                }
+            }
+        }
+        
         super.touchesMoved(touches, withEvent: event)
     }
     
     public override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+        currentSlideStatus = .SlideStatusNone
+        
         super.touchesEnded(touches, withEvent: event)
     }
     
     public override func touchesCancelled(touches: Set<NSObject>!, withEvent event: UIEvent!) {
+        currentSlideStatus = .SlideStatusNone
+        
         super.touchesCancelled(touches, withEvent: event)
     }
 }
