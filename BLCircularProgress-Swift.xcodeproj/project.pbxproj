@@ -12,7 +12,6 @@
 		07DBC8FA4D816DF472F1FB28D5C08162 /* AnimationProgressAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA816DB1BF4BE3AF730563AD0B6043C /* AnimationProgressAlgorithm.swift */; };
 		220C520A432AD770C24CFA77E2D8C374 /* QuinticAnimationAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3C9E4C21DA7F5EC63C53029D2EF63 /* QuinticAnimationAlgorithm.swift */; };
 		37D82F4409E1277D19316DE5DE092E37 /* CubicAnimationAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01C0A2C81803A3F0C72C4DCDE637904 /* CubicAnimationAlgorithm.swift */; };
-		562BA3447C08E7AB55031D9C106E2DA1 /* BLCircularProgressViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F36B25E4AC9D88604004E81E86B64046 /* BLCircularProgressViewHelper.swift */; };
 		6F9A02CCE7A4E22E73ABB7B03CCD018B /* BLCircularProgress_SwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DCC9DDB410905B8608F62F63BCF322 /* BLCircularProgress_SwiftTests.swift */; };
 		7EF62B2BBE7410F38DD97317EB78E227 /* QuarticAnimationAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D80EEB997194E877F3B7A77BE36C02 /* QuarticAnimationAlgorithm.swift */; };
 		7F70DE3169089029EB0710AEF974A39A /* CircularAnimationAlgorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD462AB0E5B7B10BFFBE9EB08F7525A /* CircularAnimationAlgorithm.swift */; };
@@ -57,7 +56,6 @@
 		E01C0A2C81803A3F0C72C4DCDE637904 /* CubicAnimationAlgorithm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CubicAnimationAlgorithm.swift; path = AnimationProgressAlgorithms/CubicAnimationAlgorithm.swift; sourceTree = "<group>"; };
 		E6DCC9DDB410905B8608F62F63BCF322 /* BLCircularProgress_SwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLCircularProgress_SwiftTests.swift; sourceTree = "<group>"; };
 		E976FD7369C9C3ACC6BF0EFF2337AF1A /* QuadraticAnimationAlgorithm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QuadraticAnimationAlgorithm.swift; path = AnimationProgressAlgorithms/QuadraticAnimationAlgorithm.swift; sourceTree = "<group>"; };
-		F36B25E4AC9D88604004E81E86B64046 /* BLCircularProgressViewHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLCircularProgressViewHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +98,6 @@
 			children = (
 				EE59571CB9515A88B3BE37A70547DE17 /* AnimationProgressAlgorithms */,
 				160ED21BCD801BCA6E502F5053A680DB /* BLCircularProgressView.swift */,
-				F36B25E4AC9D88604004E81E86B64046 /* BLCircularProgressViewHelper.swift */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -272,7 +269,6 @@
 				07DBC8FA4D816DF472F1FB28D5C08162 /* AnimationProgressAlgorithm.swift in Sources */,
 				8ABB5F106D5EC368EBC36358EDE14608 /* AppDelegate.swift in Sources */,
 				B71B0C12DEE484360F397BAD63968496 /* BLCircularProgressView.swift in Sources */,
-				562BA3447C08E7AB55031D9C106E2DA1 /* BLCircularProgressViewHelper.swift in Sources */,
 				7F70DE3169089029EB0710AEF974A39A /* CircularAnimationAlgorithm.swift in Sources */,
 				37D82F4409E1277D19316DE5DE092E37 /* CubicAnimationAlgorithm.swift in Sources */,
 				91F7A621977D73CC4114618A000074F2 /* ExponentialAnimationAlgorithm.swift in Sources */,
