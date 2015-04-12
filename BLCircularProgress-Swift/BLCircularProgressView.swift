@@ -25,6 +25,17 @@ enum SlideStatus {
     case SlideStatusOutOfBorderFromMaximumValue
 }
 
+@objc public protocol BLCircularProgressViewProtocol: NSObjectProtocol {
+    optional func circularTouchesBegan(circularProgressView: BLCircularProgressView, progress: Double)
+    optional func circularTouchesMoved(circularProgressView: BLCircularProgressView, progress: Double)
+    optional func circularTouchesEnded(circularProgressView: BLCircularProgressView, progress: Double)
+    optional func circularTouchesCancelled(circularProgressView: BLCircularProgressView, progress: Double)
+    
+    optional func circularAnimationBegan(circularProgressView: BLCircularProgressView, progress: Double)
+    optional func circularAnimationDuring(circularProgressView: BLCircularProgressView, progress: Double)
+    optional func circularAnimationEnded(circularProgressView: BLCircularProgressView, progress: Double)
+}
+
 public class BLCircularProgressView: UIView {
     private var currentSlideStatus: SlideStatus = .SlideStatusNone
     private var circleCenter: CGPoint = CGPoint()
@@ -35,6 +46,8 @@ public class BLCircularProgressView: UIView {
     // A closure that animation update the progress, first return value is animation count, second is current value
     private var progressCalculateClosure: (() -> (segmengCount: Int, progressValue: Double))?
     private var animationProgressAlgorithm: AnimationProgressAlgorithm = CubicAnimationAlgorithm()
+    
+    weak public var delegate: BLCircularProgressViewProtocol?
     
     public var progress: Double = 0 {
         didSet {
@@ -113,6 +126,8 @@ public class BLCircularProgressView: UIView {
         
         progressCalculateClosure = self.makeProgressCalculateClosure(startProgressValue, changeInvalue: progressUpdateDiff)
         NSTimer.scheduledTimerWithTimeInterval(1 / progressUpdateAnimationFramesPerSecond, target: self, selector: "updateProgress:", userInfo: nil, repeats: true)
+        
+        self.delegate?.circularTouchesBegan?(self, progress: self.progress)
     }
     
     // MARK: - Drawing
@@ -192,6 +207,7 @@ public class BLCircularProgressView: UIView {
             }
         }
         
+        self.delegate?.circularTouchesBegan?(self, progress: self.progress)
         super.touchesBegan(touches, withEvent: event)
     }
     
@@ -234,18 +250,21 @@ public class BLCircularProgressView: UIView {
             }
         }
         
+        self.delegate?.circularTouchesMoved?(self, progress: self.progress)
         super.touchesMoved(touches, withEvent: event)
     }
     
     public override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         currentSlideStatus = .SlideStatusNone
         
+        self.delegate?.circularTouchesEnded?(self, progress: self.progress)
         super.touchesEnded(touches, withEvent: event)
     }
     
     public override func touchesCancelled(touches: Set<NSObject>!, withEvent event: UIEvent!) {
         currentSlideStatus = .SlideStatusNone
         
+        self.delegate?.circularTouchesCancelled?(self, progress: self.progress)
         super.touchesCancelled(touches, withEvent: event)
     }
     
@@ -279,6 +298,8 @@ public class BLCircularProgressView: UIView {
         if segmentCount >= Int(progressUpdateAnimationFramesPerSecond * self.progressAnimationDuration) {
             self.userInteractionEnabled = true
             timer.invalidate()
+            
+            self.delegate?.circularAnimationEnded?(self, progress: self.progress)
             return ;
         }
         self.progress = calculateResult.1
@@ -294,6 +315,8 @@ public class BLCircularProgressView: UIView {
         func calculateStepClosure() -> (Int, Double) {
             segmentCount++
             runningValue = calculateAlgorithmClosure(Double(segmentCount) / progressUpdateAnimationFramesPerSecond, startValue, changeInvalue, self.progressAnimationDuration)
+            
+            self.delegate?.circularAnimationDuring?(self, progress: self.progress)
             return (segmentCount, runningValue)
         }
         return calculateStepClosure

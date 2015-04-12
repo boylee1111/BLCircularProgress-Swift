@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, BLCircularProgressViewProtocol {
     
     @IBOutlet weak var circularProgress: BLCircularProgressView!
 
@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         self.circularProgress.progress = 30
         self.circularProgress.maximaProgress = 90
         self.circularProgress.minimaProgress = 20
+        self.circularProgress.delegate = self;
         
         NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "updateProgress", userInfo: nil, repeats: true)
     }
@@ -37,6 +38,18 @@ class ViewController: UIViewController {
     func randomDoubleBetween(smallValue: Double, bigValue: Double) -> Double {
         var diff = bigValue - smallValue
         return Double(arc4random_uniform(UInt32(diff))) + smallValue
+    }
+    
+    func circularAnimationBegan(circularProgressView: BLCircularProgressView, progress: Double) {
+        println("Animation Began")
+    }
+    
+    func circularAnimationDuring(circularProgressView: BLCircularProgressView, progress: Double) {
+        println("Animation During, Current Progress = \(progress)")
+    }
+    
+    func circularAnimationEnded(circularProgressView: BLCircularProgressView, progress: Double) {
+        println("Animation Ended")
     }
 }
 
